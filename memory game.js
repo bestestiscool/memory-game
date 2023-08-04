@@ -1,5 +1,7 @@
 const gameContainer = document.getElementById("game");
-
+let numCardsSelected = 0;
+let firstCard, secondCard;
+let noClicking = false;
 const COLORS = [
   "red",
   "blue",
@@ -58,51 +60,51 @@ function createDivsForColors(colorArray) {
 }
 
 // Initializing variable that will keep track of how many cards are allowed ot be opened
-let AmountOfCardsChosen = 0;
-let firstCard, secondCard;
+
 
 // TODO: Implement this function!
 function handleCardClick(event) {
-  // you can use event.target to see which element was clicked
-  console.log("you just clicked", event.target);
+  if (noClicking) return;
+  if (event.target.classList.contains("flipped")) return;
 
-  const clickedCard = event.target;
-// If two cards have already been selected, return without doing anything
-  if (AmountOfCardsChosen === 2) {
-    return;
-  }
-
-  // Change the background color to the color of the clicked card's class
+  let clickedCard = event.target;
   clickedCard.style.backgroundColor = clickedCard.classList[0];
-
-  if (AmountOfCardsChosen == 0 ) {
-    firstCard = clickedCard;
-    firstCard.style.backgroundColor = firstCard.classList[0]; 
-    AmountOfCardsChosen ++;
-    console.log("You chose 1st card");
-  }else{
-    secondCard = clickedCard;
-    secondCard.style.backgroundColor = secondCard.classList[0];
-    console.log("you chose 2nd card");
-    AmountOfCardsChosen --;
+  if (!firstCard || !secondCard) {
+    clickedCard.classList.add("flipped");
+    firstCard = firstCard || clickedCard;
+    secondCard = clickedCard === firstCard ? null : clickedCard;
   }
-  // Check if both cards are defined and their classes match
-  if (firstCard && secondCard && firstCard.classList[0] === secondCard.classList[0]) {
-    console.log("It's a match!");
+  if (firstCard && secondCard) {
+    noClicking = true;
+    // debugger
+    let storedValueCard1 = firstCard.className;
+    let storedValueCard2 = secondCard.className;
+
+  if (storedValueCard1 === storedValueCard2) {
+    numCardsSelected += 2;
     firstCard.removeEventListener("click", handleCardClick);
     secondCard.removeEventListener("click", handleCardClick);
+    firstCard = null;
+    secondCard = null;
+    noClicking = false;
   } else {
-    console.log("Not a match!");
-    setTimeout(() => {
+    setTimeout(function() {
       firstCard.style.backgroundColor = "";
       secondCard.style.backgroundColor = "";
-
-      // Reset the number of cards selected after processing the click
-      AmountOfCardsChosen = 0;
-    }, 2000);
+      firstCard.classList.remove("flipped");
+      secondCard.classList.remove("flipped");
+      firstCard = null;
+      secondCard = null;
+      noClicking = false;
+    }, 1000);
   }
+}
 
+if (numCardsSelected === COLORS.length) alert("game over!");
 }
 
 // when the DOM loads
 createDivsForColors(shuffledColors);
+
+
+
